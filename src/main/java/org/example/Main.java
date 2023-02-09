@@ -1,9 +1,7 @@
 package org.example;
 
-import java.util.Map;
-import java.util.Scanner;
-
-import static java.util.Map.entry;
+import java.util.*;
+import java.util.stream.Collectors;
 
 class CalculatorException extends RuntimeException{
     public CalculatorException(String message) {
@@ -11,32 +9,61 @@ class CalculatorException extends RuntimeException{
     }
 }
 
+enum RomeSymbol{
+    I(1),
+    IV(4),
+    V(5),
+    IX(9),
+    X(10),
+    XL(40),
+    L(50),
+    XC(90),
+    C(100);
+
+    private final int value;
+    RomeSymbol(int value){
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public static List<RomeSymbol> getAsReversedList(){
+        return Arrays.stream(RomeSymbol.values())
+                .sorted(Comparator.comparingInt(RomeSymbol::getValue).reversed())
+                .collect(Collectors.toList());
+    }
+}
+
+class Converter {
+    public static String arabToRome(int number){
+        List<RomeSymbol> romeSymbols = RomeSymbol.getAsReversedList();
+        RomeSymbol symbol = romeSymbols.get(0);
+        StringBuilder result = new StringBuilder();
+        int i = 0;
+        while (number > 0){
+            if (symbol.getValue() <= number){
+                result.append(symbol);
+                number -= symbol.getValue();
+            } else {
+                i++;
+                symbol = romeSymbols.get(i);
+            }
+        }
+        return result.toString();
+    }
+}
+
 public class Main {
 
-    private static final Map<String, Integer> romeSymbolsMap = Map.ofEntries(
-            entry("I", 1),
-            entry("II", 2),
-            entry("III", 3),
-            entry("IV", 4),
-            entry("V", 5),
-            entry("VI", 6),
-            entry("VII", 7),
-            entry("VIII", 8),
-            entry("IX", 9),
-            entry("X", 10),
-            entry("XI", 11),
-            entry("XII", 12),
-            entry("XIII", 13),
-            entry("XIV", 14),
-            entry("XV", 15),
-            entry("XVI", 16),
-            entry("XVII", 17),
-            entry("XVIII", 18),
-            entry("XIX", 19),
-            entry("XX", 20)
-    );
+    private static Map<String, Integer> romeSymbolsMap;
 
     public static void main(String[] args) {
+        romeSymbolsMap = new HashMap<>();
+        for (int i = 1; i <= 100; i++){
+            romeSymbolsMap.put(Converter.arabToRome(i), i);
+        }
         Scanner scanner = new Scanner(System.in);
         String value = calc(scanner.nextLine());
         System.out.println(value);
